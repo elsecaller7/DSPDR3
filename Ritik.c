@@ -4,8 +4,8 @@
 
 #include "Ritik.h"
 
-
-extern matrix[12][10];
+extern int done;
+extern int matrix[12][10];
 void init_ledger(ledger *pq) {
     for (int i = 0; i < 100; ++i) {
         pq->priority[i]=NULL;
@@ -19,6 +19,7 @@ void add_rat(ledger *pq, int cost) {
     new->steps=0;
     new->path=NULL;
     new->cost=cost;
+    new->done=0;
     new->next=pq->priority[cost];
     pq->priority[cost]=new;
 }
@@ -29,108 +30,111 @@ void add_node(rat *block, int x, int y) {
     new->y=y;
     new->next = block->path;
     block->path=new;
-    block->steps=block->steps+1;
+    block->steps=(block->steps)+1;
 }
 
-void travel(ledger *pq, int i) {
-    rat *jerry=pq->priority[i];
-    while(jerry !=NULL){
-        int action_choises=0;
-        node *path = jerry->path;
-        int x=path->x;
-        int y=path->y;
-        int action[4]={0};
-        action_choises=choose_action(action,x,y,path);
+int travel(ledger *pq, int i,int max) {
+    int ret = max;
+    rat *jerry = pq->priority[i];
+    while(jerry!=NULL){
+        if(jerry->done == 1){
 
-        if(action_choises==0){
-            rat *dead=jerry;
+            if(jerry->cost <=ret){
+                ret=jerry->cost;
+            }
             jerry=jerry->next;
-            delete_rat(pq,dead);
         }
-        else if (action_choises == 1){
-            int choice=0;
-            for (int i = 0; i < 4; ++i) {
-                if(action[i]==1){
-                    choice=i+1;
-                }
-            }
-            int new_cost=take_action(jerry,choice);
-            if(new_cost!=jerry->cost){
+        else{
+            int action_len=0;
+            int action[4]={0};
+            action_len=choose_action(action,jerry);
+
+            if(action_len == 0){
                 rat *temp=jerry;
                 jerry=jerry->next;
-                move_rat(pq,temp,new_cost);
-            } else{
-                jerry=jerry->next;
+                delete_rat(pq,temp);
+            } else if (action_len == 1){
+                int act=0;
+                for (int j = 0; j < 4; ++j) {
+                    if(action[j]==1){
+                        act = j+1;
+                    }
+                }
+                int new_cost=take_action(jerry,act);
+                if(new_cost != jerry->cost){
+                    rat *temp=jerry;
+                    jerry=jerry->next;
+                    move_rat(pq,temp,new_cost);
+                } else{
+                    jerry=jerry->next;
+                }
+
+            } else if (action_len==2){
+                int c[2]={0}, k=0;
+                for (int j = 0; j < 4; ++j) {
+                    if(action[j]==1){
+                        c[k]=j+1;
+                        k++;
+                    }
+                }
+                rat *tom=split(jerry);
+                int cost_jerry=take_action(jerry,c[0]);
+                int cost_tom=take_action(tom,c[1]);
+                if(cost_jerry != jerry->cost){
+                    rat *temp=jerry;
+                    jerry=jerry->next;
+                    move_rat(pq,temp,cost_jerry);
+                }else{
+                    jerry=jerry->next;
+                }
+                tom->cost=cost_tom;
+                tom->next=pq->priority[cost_tom];
+                pq->priority[cost_tom]=tom;
+            } else if(action_len == 3){
+                int c[3]={0}, k=0;
+                for (int j = 0; j < 4; ++j) {
+                    if(action[j]==1){
+                        c[k]=j+1;
+                        k++;
+                    }
+                }
+                rat *tom=split(jerry);
+                rat *mickey=split(jerry);
+                int cost_jerry=take_action(jerry,c[0]);
+                int cost_tom=take_action(tom,c[1]);
+                int cost_mickey=take_action(mickey,c[2]);
+                if(cost_jerry != jerry->cost){
+                    rat *temp=jerry;
+                    jerry=jerry->next;
+                    move_rat(pq,temp,cost_jerry);
+                }else{
+                    jerry=jerry->next;
+                }
+                tom->cost=cost_tom;
+                tom->next=pq->priority[cost_tom];
+                pq->priority[cost_tom]=tom;
+                mickey->cost=cost_mickey;
+                mickey->next=pq->priority[cost_mickey];
+                pq->priority[cost_mickey]=mickey;
             }
+
+
 
         }
-        else if (action_choises == 2){
-            int c1,c2,flag=0;
-
-            for (int i = 0; i < 4 && flag==0; ++i) {
-                if(action[i]==1){
-                    c1=i+1;
-                    flag=1;
-                }
-            }
-            for (int i = c1; i < 4; ++i) {
-                if(action[i]==1){
-                    c2=i+1;
-                }
-            }
-            rat *tom=split(jerry);//inserting new rat just after the previous one
-            int new_costJ=take_action(jerry,c1);
-            int new_costT=take_action(tom,c2);
-            if(new_costJ!=jerry->cost){
-                rat *temp=jerry;
-                jerry=jerry->next;
-                move_rat(pq,temp,new_costJ);
-            } else{
-                jerry=jerry->next;
-            }
-            tom->next=pq->priority[new_costT];
-            pq->priority[new_costT]=tom;
-            tom->cost=new_costT;
-
-        }
-        else if(action_choises==3){
-            int ac[3],j=0;
-            for (int ik = 0; ik < 4; ++ik) {
-                if(action[ik]!=0){
-                    ac[j]=ik+1;
-                    j++;
-                }
-            }
-            rat *kani=split(jerry);
-            rat *soni = split(jerry);
-            int costJ=take_action(jerry,ac[0]);
-            int costK=take_action(kani,ac[1]);
-            int costS=take_action(soni,ac[2]);
-            if(costJ!=jerry->cost){
-                rat *temp=jerry;
-                jerry=jerry->next;
-                move_rat(pq,temp,costJ);
-            } else{
-                jerry=jerry->next;
-            }
-            kani->next=pq->priority[costK];
-            pq->priority[costK]=kani;
-            soni->next=pq->priority[costS];
-            pq->priority[costS]=soni;
-
-
-        }
-
     }
 
+    return ret;
 }
 
-int choose_action(int *action, int x, int y, node *path) {
+int choose_action(int *action,rat *jerry) {
+    int x=jerry->path->x, y=jerry->path->y;
+    node *path=jerry->path;
+    int cost=jerry->cost;
     int x1=x+1,y1=y+1,x2=x-1,y2=y-1;
-    action[0] = is_possible(path,x,y2);//left
-    action[1] = is_possible(path,x,y1);//right
-    action[2]=is_possible(path,x2,y);//up
-    action[3]=is_possible(path,x1,y);//down
+    action[0] = is_possible(path,x,y2,cost);//left
+    action[1] = is_possible(path,x,y1,cost);//right
+    action[2]=is_possible(path,x2,y,cost);//up
+    action[3]=is_possible(path,x1,y,cost);//down
     int len=0;
     for (int i = 0; i < 4; ++i) {
         if(action[i]==1){
@@ -140,7 +144,7 @@ int choose_action(int *action, int x, int y, node *path) {
     return len;
 }
 
-int is_possible(node *path, int x, int y) {
+int is_possible(node *path, int x, int y,int cost) {
     int ret=0;
     int x_back=-1,y_back=-1;
     if(path->next!=NULL){
@@ -148,7 +152,7 @@ int is_possible(node *path, int x, int y) {
     }
 
     if(x != x_back || y !=y_back){
-        if(matrix[x][y]!=-1){
+        if(matrix[x][y]!=-1 && matrix[x][y] > cost){
             ret=1;
         }
     }
@@ -184,6 +188,11 @@ void remove_rat(ledger *pq, rat *dead) {
 
 int take_action(rat *jerry, int choice) {
     jerry->path->action=choice;
+    int mx=jerry->path->x, my=jerry->path->y;
+    if(matrix[mx][my] != 122){
+        matrix[mx][my]=jerry->cost;
+    }
+
     int ret=jerry->cost;
     int x,y;
     switch (choice){
@@ -192,28 +201,48 @@ int take_action(rat *jerry, int choice) {
             x = jerry->path->x;
             y=jerry->path->y-1;
             add_node(jerry,x,y);
-            ret=jerry->cost+matrix[x][y];
+            if(matrix[x][y] == 122){
+                ret+=1;
+            }
+            if(matrix[x][y]==1000){
+                jerry->done=1;
+            }
             break;
         case 2://right
 
             x= jerry->path->x;
             y=jerry->path->y+1;
             add_node(jerry,x,y);
-            ret=jerry->cost+matrix[x][y];
+            if(matrix[x][y] == 122){
+                ret+=1;
+            }
+            if(matrix[x][y]==1000){
+                jerry->done=1;
+            }
             break;
         case 3://up
 
             x= jerry->path->x-1;
             y=jerry->path->y;
             add_node(jerry,x,y);
-            ret=jerry->cost+matrix[x][y];
+            if(matrix[x][y] == 122){
+                ret+=1;
+            }
+            if(matrix[x][y]==1000){
+                jerry->done=1;
+            }
             break;
         case 4://down
 
             x= jerry->path->x+1;
             y=jerry->path->y;
             add_node(jerry,x,y);
-            ret=jerry->cost+matrix[x][y];
+            if(matrix[x][y] == 122){
+                ret+=1;
+            }
+            if(matrix[x][y]==1000){
+                jerry->done=1;
+            }
             break;
         default:
             break;
@@ -227,6 +256,7 @@ rat *split(rat *mouse) {
     kid->path=NULL;
     kid->steps=mouse->steps;
     kid->cost=mouse->cost;
+    kid->done=mouse->done;
     node *ptr=mouse->path;
     node *kidptr=kid->path;
     while(ptr!=NULL){
@@ -270,30 +300,4 @@ void move_rat(ledger *pq, rat *jerry, int new_cost) {
 
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

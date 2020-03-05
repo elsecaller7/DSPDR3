@@ -17,6 +17,7 @@ typedef struct node_tag{
 
 typedef struct rat_tag{
     int cost;
+    int done;
     int steps;
     node *path;
     struct rat_tag *next;
