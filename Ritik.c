@@ -302,13 +302,13 @@ void move_rat(ledger *pq, rat *jerry, int new_cost) {
 
 }
 
-void print_path(ledger *pq) {
+void print_path(ledger *pq,FILE *fptr) {
     int flag =0;
     for (int i = 0; i < 100 && flag==0; ++i) {
         rat *ptr=pq->priority[i];
         while (ptr!=NULL && flag==0){
             if(ptr->done==1){
-                path_print(ptr->path->next);
+                path_print(ptr->path->next,fptr);
                 flag=1;
             }
             ptr=ptr->next;
@@ -316,27 +316,65 @@ void print_path(ledger *pq) {
     }
 }
 
-void path_print(node *head) {
+void path_print(node *head,FILE *fptr) {
     if(head !=NULL){
-        path_print(head->next);
+        path_print(head->next,fptr);
         int action=head->action;
         switch (action){
             case 1:
-                printf("1action: Left, position (%d,%d)\n",head->x,head->y);
+                fprintf(fptr,"action:Left,position(%d,%d)\n",head->x,head->y);
                 break;
             case 2:
-                printf("1action: Right, position (%d,%d)\n",head->x,head->y);
+                fprintf(fptr,"action:Right,position(%d,%d)\n",head->x,head->y);
                 break;
             case 3:
-                printf("1action: Up, position (%d,%d)\n",head->x,head->y);
+                fprintf(fptr,"action:Up,position(%d,%d)\n",head->x,head->y);
                 break;
             case 4:
-                printf("1action: Down, position (%d,%d)\n",head->x,head->y);
+                fprintf(fptr,"action:Down,position(%d,%d)\n",head->x,head->y);
                 break;
             default:
                 break;
         }
 
     }
+}
+void disp_path() {
+    char buffer[10000];
+    FILE *fptr=fopen("PATH.txt","r");
+    while(fscanf(fptr,"%s",buffer) != EOF){
+        printf("%s\n",buffer);
+    }
+    fclose(fptr);
+}
+
+
+
+void read_inp() {
+    FILE *fptr;
+    fptr = fopen("input.txt","r");
+    if(fptr != NULL){
+        for (int i = 0; i < 12; ++i) {
+            for (int j = 0; j < 10; ++j) {
+                fscanf(fptr,"%d",&matrix[i][j]);
+            }
+        }
+    }
+    fclose(fptr);
+
+}
+
+void take_maze_input() {
+    FILE *fptr;
+    int n;
+    fptr=fopen("input.txt","w");
+    for (int i = 0; i < 12; ++i) {
+        for (int j = 0; j < 10; ++j) {
+            scanf("%d",&n);
+            fprintf(fptr,"%d ",n);
+        }
+        fprintf(fptr,"\n");
+    }
+    fclose(fptr);
 }
 

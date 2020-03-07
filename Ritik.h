@@ -20,6 +20,11 @@ void remove_rat(ledger *pq,rat *dead);
 int take_action(rat *jerry,int choice);//return new cost
 rat *split(rat *mouse);
 void move_rat(ledger *pq,rat *jerry, int new_cost);
-void print_path(ledger *pq);
-void path_print(node *head);
+void print_path(ledger *pq,FILE *fptr);
+void path_print(node *head,FILE *fptr);
+void read_inp();
+void take_maze_input();
+void disp_path();
+
+
 #endif //DSPDR3_RITIK_H
