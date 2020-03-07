@@ -25,6 +25,7 @@ int main() {
     init_ledger(&pq);
     int max=100;
     done=0;
+    printf("vvv");
     while(!done){
         done=1;
         for (int i = 0; i < max; ++i) {
@@ -36,7 +37,7 @@ int main() {
         }
 
     }
-    print_path(&pq);
+ //   print_path(&pq);
 
     return 0;
 }

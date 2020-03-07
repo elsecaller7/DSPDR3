@@ -22,6 +22,7 @@ void add_rat(ledger *pq, int cost) {
     new->done=0;
     new->next=pq->priority[cost];
     pq->priority[cost]=new;
+
 }
 
 void add_node(rat *block, int x, int y) {
@@ -307,7 +308,7 @@ void print_path(ledger *pq) {
         rat *ptr=pq->priority[i];
         while (ptr!=NULL && flag==0){
             if(ptr->done==1){
-                path_print(ptr->path);
+                path_print(ptr->path->next);
                 flag=1;
             }
             ptr=ptr->next;
@@ -318,19 +319,19 @@ void print_path(ledger *pq) {
 void path_print(node *head) {
     if(head !=NULL){
         path_print(head->next);
-        int choise=head->action;
-        switch (choise){
+        int action=head->action;
+        switch (action){
             case 1:
-                printf("action: Left, position (%d,%d)\n",head->x,head->y);
+                printf("1action: Left, position (%d,%d)\n",head->x,head->y);
                 break;
             case 2:
-                printf("action: Right, position (%d,%d)\n",head->x,head->y);
+                printf("1action: Right, position (%d,%d)\n",head->x,head->y);
                 break;
             case 3:
-                printf("action: Up, position (%d,%d)\n",head->x,head->y);
+                printf("1action: Up, position (%d,%d)\n",head->x,head->y);
                 break;
             case 4:
-                printf("action: Down, position (%d,%d)\n",head->x,head->y);
+                printf("1action: Down, position (%d,%d)\n",head->x,head->y);
                 break;
             default:
                 break;
