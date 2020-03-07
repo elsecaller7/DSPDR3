@@ -36,6 +36,7 @@ int main() {
         }
 
     }
+    print_path(&pq);
 
     return 0;
 }

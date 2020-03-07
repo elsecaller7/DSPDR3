@@ -301,3 +301,41 @@ void move_rat(ledger *pq, rat *jerry, int new_cost) {
 
 }
 
+void print_path(ledger *pq) {
+    int flag =0;
+    for (int i = 0; i < 100 && flag==0; ++i) {
+        rat *ptr=pq->priority[i];
+        while (ptr!=NULL && flag==0){
+            if(ptr->done==1){
+                path_print(ptr->path);
+                flag=1;
+            }
+            ptr=ptr->next;
+        }
+    }
+}
+
+void path_print(node *head) {
+    if(head !=NULL){
+        path_print(head->next);
+        int choise=head->action;
+        switch (choise){
+            case 1:
+                printf("action: Left, position (%d,%d)\n",head->x,head->y);
+                break;
+            case 2:
+                printf("action: Right, position (%d,%d)\n",head->x,head->y);
+                break;
+            case 3:
+                printf("action: Up, position (%d,%d)\n",head->x,head->y);
+                break;
+            case 4:
+                printf("action: Down, position (%d,%d)\n",head->x,head->y);
+                break;
+            default:
+                break;
+        }
+
+    }
+}
+
