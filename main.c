@@ -24,7 +24,8 @@ int main() {
         printf("1.Enter your own maze\n");
         printf("2.Solve the maze\n");
         printf("3.Print the solution\n");
-        printf("4.Exit\n");
+        printf("4.Print the critical path\n");
+        printf("5.Exit\n");
         take_choise(&user_choise);
         printf("######################################################################\n");
         switch (user_choise){
@@ -49,10 +50,14 @@ int main() {
                 break;
             case 3:
                 disp_path();
+                break;
+            case 4:
+                critical_path_print();
+                break;
             default:
                 break;
         }
-    }while (user_choise !=4);
+    }while (user_choise !=5);
 
 
 
@@ -64,5 +69,5 @@ void take_choise(int *user_choise) {
     do{
         printf("Enter the appropriate number: ");
         scanf("%d", user_choise);
-    }while((*user_choise) < 1 || (*user_choise) > 4);
+    }while((*user_choise) < 1 || (*user_choise) > 5);
 }
