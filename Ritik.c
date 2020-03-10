@@ -26,6 +26,7 @@ status add_rat(ledger *pq, int cost) {
         new->next=pq->priority[cost];
         pq->priority[cost]=new;
     }
+    
     return sc;
 }
 
