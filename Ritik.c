@@ -1,7 +1,3 @@
-//
-// Created by ritik on 04/03/20.
-//
-
 #include "Ritik.h"
 
 extern int done;
@@ -14,24 +10,41 @@ void init_ledger(ledger *pq) {
     add_node(pq->priority[0],1,1);
 }
 
-void add_rat(ledger *pq, int cost) {
+status add_rat(ledger *pq, int cost) {
+    status sc=success;
     rat *new=malloc(sizeof(rat));
-    new->steps=0;
-    new->path=NULL;
-    new->cost=cost;
-    new->done=0;
-    new->next=pq->priority[cost];
-    pq->priority[cost]=new;
-
+    if(new==NULL)
+    {
+        sc=failure;
+    }
+    else
+    {
+        new->steps=0;
+        new->path=NULL;
+        new->cost=cost;
+        new->done=0;
+        new->next=pq->priority[cost];
+        pq->priority[cost]=new;
+    }
+    return sc;
 }
 
-void add_node(rat *block, int x, int y) {
+status add_node(rat *block, int x, int y) {
     node *new= malloc(sizeof(node));
-    new->x=x;
-    new->y=y;
-    new->next = block->path;
-    block->path=new;
-    block->steps=(block->steps)+1;
+    status sc=success;
+    if(new==NULL)
+    {
+        sc=failure;
+    }
+    else
+    {
+        new->x=x;
+        new->y=y;
+        new->next = block->path;
+        block->path=new;
+        block->steps=(block->steps)+1;
+    }
+    return sc;
 }
 
 int travel(ledger *pq, int i,int max) {
@@ -51,9 +64,10 @@ int travel(ledger *pq, int i,int max) {
             action_len=choose_action(action,jerry);
 
             if(action_len == 0){
+                status sc;
                 rat *temp=jerry;
                 jerry=jerry->next;
-                delete_rat(pq,temp);
+                sc=delete_rat(pq,temp);
             } else if (action_len == 1){
                 int act=0;
                 for (int j = 0; j < 4; ++j) {
@@ -160,34 +174,54 @@ int is_possible(node *path, int x, int y,int cost) {
     return ret;
 }
 
-void delete_rat(ledger *pq, rat *dead) {
-    node *path=dead->path;
-    node *fr;
-    while(path!=NULL){
-        fr=path;
-        path=path->next;
-        free(fr);
+status delete_rat(ledger *pq, rat *dead) {
+    status sc=success;
+    if(dead==NULL)
+    {
+        sc=failure;
     }
-    remove_rat(pq,dead);
+    else
+    {
+         node *path=dead->path;
+        node *fr;
+        while(path!=NULL){
+            fr=path;
+            path=path->next;
+            free(fr);
+        }
+        sc=remove_rat(pq,dead);
+    }
+    return sc;   
 }
 
-void remove_rat(ledger *pq, rat *dead) {
-    int index=dead->cost;
-    rat *prev=pq->priority[index];
-    if(prev==dead){
-        pq->priority[index]=dead->next;
-        free(dead);
+status remove_rat(ledger *pq, rat *dead) {
+    status sc=success;
+    if(dead==NULL)
+    {
+        sc=failure;
     }
-    else{
-        while(prev->next!=dead){
-            prev=prev->next;
+    else
+    {
+        int index=dead->cost;
+        rat *prev=pq->priority[index];
+        if(prev==dead){
+            pq->priority[index]=dead->next;
+            free(dead);
         }
-        prev->next=dead->next;
-        free(dead);
+        else{
+            while(prev->next!=dead){
+                prev=prev->next;
+            }
+            prev->next=dead->next;
+            free(dead);
+        }
     }
+    return sc;
+   
 }
 
 int take_action(rat *jerry, int choice) {
+    status sc=success;
     jerry->path->action=choice;
     int mx=jerry->path->x, my=jerry->path->y;
     if(matrix[mx][my] != 122){
@@ -201,49 +235,65 @@ int take_action(rat *jerry, int choice) {
 
             x = jerry->path->x;
             y=jerry->path->y-1;
-            add_node(jerry,x,y);
-            if(matrix[x][y] == 122){
+            sc=add_node(jerry,x,y);
+            if(sc==success)
+            {
+                if(matrix[x][y] == 122){
                 ret+=1;
+                }
+                if(matrix[x][y]==1000){
+                    jerry->done=1;
+                }
             }
-            if(matrix[x][y]==1000){
-                jerry->done=1;
-            }
+            
             break;
         case 2://right
 
             x= jerry->path->x;
             y=jerry->path->y+1;
-            add_node(jerry,x,y);
-            if(matrix[x][y] == 122){
+            sc=add_node(jerry,x,y);
+            if(sc==success)
+            {
+                if(matrix[x][y] == 122){
                 ret+=1;
+                }
+                if(matrix[x][y]==1000){
+                    jerry->done=1;
+                }
             }
-            if(matrix[x][y]==1000){
-                jerry->done=1;
-            }
+            
             break;
         case 3://up
 
             x= jerry->path->x-1;
             y=jerry->path->y;
-            add_node(jerry,x,y);
-            if(matrix[x][y] == 122){
+            sc=add_node(jerry,x,y);
+            if(sc==success)
+            {
+              if(matrix[x][y] == 122){
                 ret+=1;
+                }
+                if(matrix[x][y]==1000){
+                    jerry->done=1;
+                }  
             }
-            if(matrix[x][y]==1000){
-                jerry->done=1;
-            }
+            
             break;
         case 4://down
 
             x= jerry->path->x+1;
             y=jerry->path->y;
-            add_node(jerry,x,y);
-            if(matrix[x][y] == 122){
-                ret+=1;
+            sc=add_node(jerry,x,y);
+            if(sc==success)
+            {
+                if(matrix[x][y] == 122){
+                    ret+=1;
+                }
+                if(matrix[x][y]==1000){
+                    jerry->done=1;
+                }
             }
-            if(matrix[x][y]==1000){
-                jerry->done=1;
-            }
+            
             break;
         default:
             break;
@@ -277,7 +327,7 @@ rat *split(rat *mouse) {
             ptr=ptr->next;
         }
         else{
-            printf("Go to Hell\n");
+            printf("not enough space\n");
         }
 
     }
@@ -377,4 +427,36 @@ void take_maze_input() {
     }
     fclose(fptr);
 }
-
+void critical_path_print(){
+    dlnode* prev,*start,*nptr;
+    start=NULL; 
+    prev=NULL;
+    for(int i=0;i<12;i++){
+        for(int j=0;j<10;j++){
+            if(matrix[i][j]==122)
+            {
+                nptr=(dlnode*)malloc(sizeof(dlnode));
+                nptr->x=i;
+                nptr->y=j;
+                nptr->next=NULL;
+                nptr->prev=prev;
+                if(prev==NULL)
+                {
+                    start=nptr;
+                }
+                else
+                {
+                    prev->next=nptr;
+                }
+                prev=nptr;
+            }
+        }
+    }
+    printf("\n");
+    prev=start;
+    while(prev!=NULL)
+    {
+        printf("(%d,%d)\n",prev->x,prev->y);
+        prev=prev->next;
+    }
+}
